@@ -1,0 +1,23 @@
+{
+  "name": "Atualiza-Produtos",
+  "version": "1.0.0",
+  "description": "Projeto criado para atualizar dados tributários dos produtos. Cliente: Trindade Contabilidade",
+  "main": "./src/index.js",
+  "scripts": {
+        "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DaniloJrC/Atualiza-Produtos.git"
+  },
+  "keywords": [],
+  "author": "Danilo Junio Constâncio",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DaniloJrC/Atualiza-Produtos/issues"
+  },
+  "homepage": "https://github.com/DaniloJrC/Atualiza-Produtos#readme",
+  "devDependencies": {
+    "electron": "^11.1.1"
+  }
+}
