@@ -154,3 +154,8 @@ body {
 	position:relative;
 	top:1px;
 }
+::-ms-browse {
+  background: black;
+  color: red;
+  padding: 1em;
+}

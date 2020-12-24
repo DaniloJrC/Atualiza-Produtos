@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt">
     <head>
         <meta charset="UTF-8">
         <title>Atualiza produtos</title>
         <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+        <script src="js/jquery.js"> </script>
+        <script lang="javascript" src="js/xlsx.full.min.js"></script>
+        <script lang="javascript" src="index.js"></script>
         <link rel="stylesheet" href="styles.css">
     </head>
     <body>
@@ -11,19 +14,19 @@
         <div class="main-div">
             <div class="line-div">
                 <div class="input-right-data-div">
-                    <input id="inputRightData" class="input-right-data" type="text" onmousedown="return false"
-                        placeholder="Insira a planilha correta aqui...">
+                    <input id="inputRightData" class="input-right-data" type="file" onmousedown="return false"
+                        accept=".xls, .xlsx" placeholder="Insira a planilha correta aqui...">
                     <button class="choose-right-data-button" onmousedown="return false" type="button">...</button>
                 </div>
             </div>
             <div class="line-div">
                 <div class="input-wrong-data-div">
-                    <input id="inputWrongData" class="input-wrong-data" type="text" onmousedown="return false"
-                        placeholder="Insira a planilha a ser analisada aqui...">
+                    <input id="inputWrongData" class="input-wrong-data" type="file" onmousedown="return false"
+                        accept=".xls, .xlsx" placeholder="Insira a planilha a ser analisada aqui...">
                     <button class="choose-wrong-data-button" onmousedown="return false" type="button">...</button>
                 </div>
             </div>
-            <button onclick="alert()" id="processButton" class="process-button"
+            <button onclick="convertToJSON()" id="processButton" class="process-button"
                 onmousedown="return false">Processar</button>
         </div>
     </body>

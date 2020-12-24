@@ -4,7 +4,7 @@
   "description": "Projeto criado para atualizar dados tributários dos produtos. Cliente: Trindade Contabilidade",
   "main": "./src/index.js",
   "scripts": {
-        "start": "electron ."
+    "start": "electron ."
   },
   "repository": {
     "type": "git",
@@ -19,5 +19,8 @@
   "homepage": "https://github.com/DaniloJrC/Atualiza-Produtos#readme",
   "devDependencies": {
     "electron": "^11.1.1"
+  },
+  "dependencies": {
+    "xlsx": "^0.16.9"
   }
 }
