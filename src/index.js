@@ -142,7 +142,102 @@ function showParameters() {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
-// Compare data and create new excel file
+// Load data from excel tables and compare 
+//------------------------------------------------------------------------------------------------------------------------------------------------
+
+function loadDataFromExcel() {
+    Promise.all([getItems(), getItemsToAnalyze()]).then((values) => {
+        const productsFromDatabase = values[0]
+        const productsToFixData = values[1]
+        compareDataExtractedFromExcel(productsFromDatabase, productsToFixData)
+    })
+}
+
+function compareDataExtractedFromExcel(productsFromDatabase, productsToFixData) {
+    productsToFixData.forEach(function (productsFound, index) {
+        getProgressPercentage(index, productsToFixData - 1)
+        const productsByBarCode = productsFromDatabase.filter(item => {
+            return item.REFERENCIA === productsFound.REFERENCIA
+        })
+        const productToFix = productsByBarCode[0]
+        const fixedProduct = fixProduct(productToFix)
+        addUpdatedProductToJSON(fixedProduct)
+
+    })
+    downloadAsExcel(productsChecked)
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------------
+// Fix product data 
+//------------------------------------------------------------------------------------------------------------------------------------------------
+
+function fixProduct(productToFix) {
+    const newItem = []
+    parameters.forEach(function (currentParameter, index) {
+        const data = { [currentParameter]: productToFix[currentParameter] }
+        newItem.push(data)
+    })
+    const productFixed = {}
+    for (var i = 0; i < newItem.length; i++) {
+        for (var propriedade in newItem[i]) {
+            productFixed[propriedade] = newItem[i][propriedade]
+        }
+    }
+    return productFixed
+}
+
+function addUpdatedProductToJSON(productFixed) {
+    productsChecked.push(productFixed)
+    console.log(productFixed)
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------------
+// Download new excel table
+//------------------------------------------------------------------------------------------------------------------------------------------------
+
+function downloadAsExcel(data) {
+    if (data) {
+        var worksheet = XLSX.utils.json_to_sheet(data)
+        const workbook = {
+            Sheets: {
+                'data': worksheet
+            },
+            SheetNames: ['data']
+        }
+
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
+        saveAsExcel(excelBuffer, 'myFile')
+    }
+}
+
+function saveAsExcel(buffer, filename) {
+    const data = new Blob([buffer], { type: EXCEL_TYPE })
+    saveAs(data, filename + EXCEL_EXTENSION)
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------------
+// Update progress status
+//------------------------------------------------------------------------------------------------------------------------------------------------
+
+function getProgressPercentage(value, total) {
+    const percent = (value / total) * 100
+    updateProgressTo(percent.toPrecision(3))
+}
+
+function showProgressBar() {
+    const progressBarDiv = document.getElementById('progressBarDiv')
+    progressBarDiv.style.display = "block"
+}
+
+function updateProgressTo(progress) {
+    const progressBar = document.getElementById('progressBar')
+    progressBar.style.width = progress + "%"
+    progressBar.innerHTML = progress + "%"
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------------
+// Read data from excel tables
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
 function getItems() {
@@ -196,80 +291,3 @@ function getItemsToAnalyze() {
     })
 }
 
-function loadDataFromExcel() {
-    Promise.all([getItems(), getItemsToAnalyze()]).then((values) => {
-        const productsFromDatabase = values[0]
-        const productsToFixData = values[1]
-        compareDataExtractedFromExcel(productsFromDatabase, productsToFixData)
-    })
-}
-
-function compareDataExtractedFromExcel(productsFromDatabase, productsToFixData) {
-    productsToFixData.forEach(function (productsFound, index) {
-        getProgressPercentage(index, productsToFixData - 1)
-        const productsByBarCode = productsFromDatabase.filter(item => {
-            return item.REFERENCIA === productsFound.REFERENCIA
-        })
-        const productToFix = productsByBarCode[0]
-        const fixedProduct = fixProduct(productToFix)
-        addUpdatedProductToJSON(fixedProduct)
-
-    })
-    downloadAsExcel(productsChecked)
-}
-
-function fixProduct(productToFix) {
-    const newItem = []
-    parameters.forEach(function (currentParameter, index) {
-        const data = { [currentParameter]: productToFix[currentParameter] }
-        newItem.push(data)
-    })
-    const productFixed = {}
-    for (var i = 0; i < newItem.length; i++) {
-        for (var propriedade in newItem[i]) {
-            productFixed[propriedade] = newItem[i][propriedade]
-        }
-    }
-    return productFixed
-}
-
-function addUpdatedProductToJSON(productFixed) {
-    productsChecked.push(productFixed)
-    console.log(productFixed)
-}
-
-function downloadAsExcel(data) {
-    if (data) {
-        var worksheet = XLSX.utils.json_to_sheet(data)
-        const workbook = {
-            Sheets: {
-                'data': worksheet
-            },
-            SheetNames: ['data']
-        }
-
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
-        saveAsExcel(excelBuffer, 'myFile')
-    }
-}
-
-function saveAsExcel(buffer, filename) {
-    const data = new Blob([buffer], { type: EXCEL_TYPE })
-    saveAs(data, filename + EXCEL_EXTENSION)
-}
-
-function getProgressPercentage(value, total) {
-    const percent = (value / total) * 100
-    updateProgressTo(percent.toPrecision(3))
-}
-
-function showProgressBar() {
-    const progressBarDiv = document.getElementById('progressBarDiv')
-    progressBarDiv.style.display = "block"
-}
-
-function updateProgressTo(progress) {
-    const progressBar = document.getElementById('progressBar')
-    progressBar.style.width = progress + "%"
-    progressBar.innerHTML = progress + "%"
-}
