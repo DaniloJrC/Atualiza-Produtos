@@ -26,6 +26,21 @@ body {
     src: url("/fonts/Quicksand-Regular.ttf");
 }
 
+.settings-button {
+    top: 0px;
+    right: 0px;
+    width: auto;
+    height: auto;
+    position: absolute;
+    border: none;
+    font-family: "Quicksand-Medium";
+    font-size: 20px;
+    background-color: white;
+    color: #4a4a4a;
+    padding: 16px 16px;
+    cursor: pointer;
+}
+
 .title {
     color: #4a4a4a;
     font-size: 18px;
@@ -176,14 +191,19 @@ body {
     border-radius: 15px;
     grid-column-start: 1;
     grid-column-end: 1;
+    transition: 0.5s;
 }
 
 .progress {
-    width: 20%;
+    width: 0%;
+    transition: 0.5s;
 }
 
-
 /* CSS EFFECTS */
+
+.settings-button:hover {
+    color: #50e3c2;
+}
 
 .input-right-data:hover {
     background: #f1f1f1;
@@ -206,4 +226,159 @@ body {
     background: black;
     color: red;
     padding: 1em;
+}
+
+
+/* MODAL STYLE */
+
+.modal {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    /* Stay in place */
+    z-index: 1;
+    /* Sit on top */
+    padding-top: 25px;
+    /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%;
+    /* Full width */
+    height: 100%;
+    /* Full height */
+    overflow: auto;
+    /* Enable scroll if needed */
+    background-color: rgb(0, 0, 0);
+    /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Black w/ opacity */
+}
+
+/* Modal Content */
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 12px;
+    border-width: 0px;
+    border-radius: 12px;
+    border-style: solid;
+    border-color: #50e3c2;
+    width: 80%;
+    height: 65%;
+    display: grid;
+    grid-template-columns: 95% 5%;
+    grid-template-rows: 32px auto;
+    grid-gap: 12px 0px;
+}
+
+.modal-title{
+    color: #4a4a4a;
+    font-size: 16px;
+    text-align: left;
+    font-family: "Quicksand-Medium";
+    grid-column-start: 1;
+    grid-column-end: 2;
+    align-items: flex-start;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.close {
+    color: #4a4a4a;
+    font-size: 32px;
+    font-weight: bold;
+    grid-column-start: 2;
+    grid-column-end: 2;
+    text-align: center;
+    align-items: flex-end;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.close:hover,
+.close:focus {
+    color: #50e3c2;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.check-box-div {
+    overflow: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 24px;
+    grid-gap: 0px;
+    grid-column-start: 1;
+    grid-column-end: 3;
+}
+
+.divBox{
+    display: grid;
+    grid-template-columns: 1fr 9fr;
+    grid-template-rows: 24px;
+    grid-gap: 0px;
+}
+
+.checkBox{
+    text-align: center;
+}
+
+.labelCheckBox {
+    color: #4a4a4a;
+    font-family: "Quicksand-Medium";
+    font-size: 14px;
+}
+
+/* LOADER STYLE AND ANIMATION */
+
+#loader {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: 50px;
+  height: 50px;
+  margin: -76px 0 0 -50px;
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #50e3c2;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Add animation to "page content" */
+.animate-bottom {
+  position: relative;
+  -webkit-animation-name: animatebottom;
+  -webkit-animation-duration: 1s;
+  animation-name: animatebottom;
+  animation-duration: 1s
+}
+
+@-webkit-keyframes animatebottom {
+  from { bottom:-100px; opacity:0 } 
+  to { bottom:0px; opacity:1 }
+}
+
+@keyframes animatebottom { 
+  from{ bottom:-100px; opacity:0 } 
+  to{ bottom:0; opacity:1 }
+}
+
+#myDiv {
+  display: none;
+  text-align: center;
 }
