@@ -9,6 +9,10 @@ const XLSX = require('xlsx')
 let productsChecked = []
 var parameters
 
+//------------------------------------------------------------------------------------------------------------------------------------------------
+// Create main window
+//------------------------------------------------------------------------------------------------------------------------------------------------
+
 function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 634,
@@ -48,7 +52,7 @@ app.on('activate', () => {
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
 function createSettingsWindow() {
-    const selectedFile = document.getElementById('inputRightData').files[0]
+    const selectedFile = document.getElementById('file').files[0]
     if (selectedFile) {
         createColumnsParameters()
         var settingsModal = document.getElementById("settingsModal")
@@ -243,7 +247,7 @@ function updateProgressTo(progress) {
 function getItems() {
     showProgressBar()
     return new Promise((resolve, rejected) => {
-        const selectedFile = document.getElementById('inputRightData').files[0]
+        const selectedFile = document.getElementById('file').files[0]
         if (selectedFile) {
             let fileReader = new FileReader()
             fileReader.readAsBinaryString(selectedFile)
@@ -269,7 +273,7 @@ function getItems() {
 
 function getItemsToAnalyze() {
     return new Promise((resolve, rejected) => {
-        const selectedFile = document.getElementById('inputWrongData').files[0]
+        const selectedFile = document.getElementById('file2').files[0]
         if (selectedFile) {
             let fileReader = new FileReader()
             fileReader.readAsBinaryString(selectedFile)
@@ -291,3 +295,14 @@ function getItemsToAnalyze() {
     })
 }
 
+function updateInputProductsDataSpan(element) {
+    console.log("Primeiro input " + element)
+    const inputProductsDataSpan = document.getElementById('inputProductsDataSpan')
+    inputProductsDataSpan.textContent = element.value.split('\\').pop()
+}
+
+function updateInputProductsToFixDataSpan(element) {
+    console.log("Segundo input " + element)
+    const inputProductsToFixDataSpan = document.getElementById('inputProductsToFixDataSpan')
+    inputProductsToFixDataSpan.textContent = element.value.split('\\').pop()
+}

@@ -80,7 +80,7 @@ body {
     grid-gap: 0px;
     position: absolute;
     grid-column-start: 2;
-    grid-column-end: 2;
+    grid-column-end: 3;
 }
 
 .input-right-data {
@@ -327,26 +327,30 @@ body {
 }
 
 .labelCheckBox {
+    padding-left: 4px;
     color: #4a4a4a;
     font-family: "Quicksand-Medium";
-    font-size: 14px;
+    font-size: 12px;
 }
 
 /* LOADER STYLE AND ANIMATION */
 
+/* Center the loader */
 #loader {
   position: absolute;
   left: 50%;
   top: 50%;
   z-index: 1;
-  width: 50px;
-  height: 50px;
-  margin: -76px 0 0 -50px;
-  border: 16px solid #f3f3f3;
+  width: 42px;
+  height: 42px;
+  margin: auto;
+  border: 10px solid #f3f3f3;
   border-radius: 50%;
-  border-top: 16px solid #50e3c2;
+  border-top: 10px solid #3498db;
   -webkit-animation: spin 2s linear infinite;
   animation: spin 2s linear infinite;
+  grid-column-start: 1;
+  grid-column-end: 1;
 }
 
 @-webkit-keyframes spin {
@@ -381,4 +385,10 @@ body {
 #myDiv {
   display: none;
   text-align: center;
+}
+
+.form-group{
+    
+    grid-column-start: 2;
+    grid-column-end: 3;
 }

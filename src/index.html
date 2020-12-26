@@ -1,39 +1,58 @@
 <!DOCTYPE html>
 <html lang="pt">
-    <!--===============================================================================================-->
     <head>
+        <!--==============================================================================================================================================-->
         <meta charset="UTF-8">
+        <!--==============================================================================================================================================-->
         <title>Atualiza produtos</title>
+        <!--==============================================================================================================================================-->
         <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
-        <script lang="javascript" src="index.js"></script>
-        <link rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.11.6/xlsx.core.min.js"></script>
+        <!--==============================================================================================================================================-->
+        <script lang="javascript" src="../src/index.js"></script>
+        <!--==============================================================================================================================================-->
+        <!-- <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">-->
+        <!--==============================================================================================================================================-->
+        <link rel="stylesheet" href="../teste/style.css">
+        <!--==============================================================================================================================================-->
         <script src="filesaver.js"></script>
+        <!--==============================================================================================================================================-->
         <link rel="stylesheet" href="styles.css">
+        <!--==============================================================================================================================================-->
+        <!--==============================================================================================================================================-->
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css'>
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css'>
+        <link rel="stylesheet" href="../teste//style.css">
+        <!--==============================================================================================================================================-->
+        <!--==============================================================================================================================================-->
     </head>
-    <!--===============================================================================================-->
     <body>
         <h3 class="title">Atualiza produtos</h3>
         <div class="title-div">
             <button id="openModalButton" onclick="createSettingsWindow()" onmousedown="return false"
                 class="settings-button"><i class="fa fa-bars"></i></button>
         </div>
-        <div class="main-div" onload="updateInputListener(), updateButtonListener()">
-            <div class="line-div">
-                <div class="input-right-data-div">
-                    <input id="inputRightData" class="input-right-data" type="file" onmousedown="return false"
-                        accept=".xls, .xlsx" placeholder="Insira a planilha correta aqui...">
-                    <button class="choose-right-data-button" onmousedown="return false" type="button">...</button>
-                </div>
+        <div class="main-div">
+            <!--==============================================================================================================================================-->
+            <div class="form-group">
+                <input type="file" name="inputProductsData" id="file" class="input-file" accept=".xls, .xlsx"
+                    onchange="updateInputProductsDataSpan(this)">
+                <label for="file" class="btn btn-tertiary js-labelFile">
+                    <i class="icon fa fa-check"></i>
+                    <span id="inputProductsDataSpan" class="js-fileName">Insira a planilha mãe aqui...</span>
+                </label>
             </div>
-            <div class="line-div">
-                <div class="input-wrong-data-div">
-                    <input id="inputWrongData" class="input-wrong-data" type="file" onmousedown="return false"
-                        accept=".xls, .xlsx" placeholder="Insira a planilha a ser analisada aqui...">
-                    <button class="choose-wrong-data-button" onmousedown="return false" type="button">...</button>
-                </div>
+            <!--==============================================================================================================================================-->
+            <div class="form-group">
+                <input type="file" name="inputProductsToFixData" id="file2" class="input-file" accept=".xls, .xlsx"
+                    onchange="updateInputProductsToFixDataSpan(this)">
+                <label for="file2" class="btn btn-tertiary js-labelFile">
+                    <i class="icon fa fa-check"></i>
+                    <span id="inputProductsToFixDataSpan" class="js-fileName">Insira a planilha a ser analisada
+                        aqui...</span>
+                </label>
             </div>
+            <!--==============================================================================================================================================-->
             <button onclick="loadDataFromExcel()" id="processButton" class="process-button"
                 onmousedown="return false">Processar</button>
             <div id="progressBarDiv" style="display: none" class="progress-bar-div">
@@ -41,16 +60,17 @@
                     <div id="progressBar" class="progress-bar progress">5%</div>
                 </div>
             </div>
+            <!--==============================================================================================================================================-->
         </div>
         <div id="settingsModal" class="modal">
-            <!--===============================================================================================-->
+            <!--==============================================================================================================================================-->
             <div id="modalDiv" class="modal-content">
                 <h3 class="modal-title">Colunas que serão atualizadas</h3>
                 <span id="closeModalButton" onclick="closeModal()" class="close">&times;</span>
                 <div id="checkBoxDiv" class="check-box-div">
                 </div>
             </div>
-            <!--===============================================================================================-->
+            <!--==============================================================================================================================================-->
         </div>
     </body>
 </html>
