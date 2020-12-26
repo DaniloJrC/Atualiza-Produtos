@@ -1,11 +1,12 @@
 "use strict";
-const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-const EXCEL_EXTENSION = '.xlsx';
+
+const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
+const EXCEL_EXTENSION = '.xlsx'
 
 const { app, BrowserWindow } = require('electron')
-const XLSX = require('xlsx');
-//const saveAs = require('./filesaver');
+const XLSX = require('xlsx')
 
+let productsChecked = []
 var parameters
 
 function createWindow() {
@@ -195,55 +196,61 @@ function getItemsToAnalyze() {
     })
 }
 
-function compareData() {
-    getItems().then(function (checkedItems) {
-        console.log(parameters)
-        const checkedItemsCount = checkedItems.length
-        console.log('Loaded items count: ' + checkedItemsCount)
-        getItemsToAnalyze().then(function (itemsToAnalyze) {
-            const itemsToAnalyzeCount = itemsToAnalyze.length
-            console.log('Loaded items to analyze count: ' + itemsToAnalyzeCount)
-            console.log(itemsToAnalyze)
-            let productsChecked = []
-            itemsToAnalyze.forEach(function (itemToAnalyze, index) {
-                getProgressPercentage(index, itemsToAnalyzeCount - 1)
-                const itemsToUpdate = checkedItems.filter(item => {
-                    return item.REFERENCIA === itemToAnalyze.REFERENCIA
-                })
-                const itemToUpdate = itemsToUpdate[0]
-                const newItem = []
-                parameters.forEach(function (currentParameter, index) {
-                    const data = { [currentParameter]: itemToUpdate[currentParameter] }
-                    newItem.push(data)
-                })
-                const newItemJSON = {}
-                for (var i = 0; i < newItem.length; i++) {
-                    for (var propriedade in newItem[i]) {
-                        newItemJSON[propriedade] = newItem[i][propriedade]
-                    }
-                }
-                productsChecked.push(newItemJSON)
-                console.log(newItemJSON)
-                const products = JSON.stringify(productsChecked)
-                console.log('Produtos: ' + products)
-            })
-            downloadAsExcel(productsChecked)
-        })
+function loadDataFromExcel() {
+    Promise.all([getItems(), getItemsToAnalyze()]).then((values) => {
+        const productsFromDatabase = values[0]
+        const productsToFixData = values[1]
+        compareDataExtractedFromExcel(productsFromDatabase, productsToFixData)
     })
 }
 
-function downloadAsExcel(data) {
-    var worksheet = XLSX.utils.json_to_sheet(data)
-    const workbook = {
-        Sheets: {
-            'data': worksheet
-        },
-        SheetNames: ['data']
-    }
+function compareDataExtractedFromExcel(productsFromDatabase, productsToFixData) {
+    productsToFixData.forEach(function (productsFound, index) {
+        getProgressPercentage(index, productsToFixData - 1)
+        const productsByBarCode = productsFromDatabase.filter(item => {
+            return item.REFERENCIA === productsFound.REFERENCIA
+        })
+        const productToFix = productsByBarCode[0]
+        const fixedProduct = fixProduct(productToFix)
+        addUpdatedProductToJSON(fixedProduct)
 
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
-    console.log(excelBuffer)
-    saveAsExcel(excelBuffer, 'myFile')
+    })
+    downloadAsExcel(productsChecked)
+}
+
+function fixProduct(productToFix) {
+    const newItem = []
+    parameters.forEach(function (currentParameter, index) {
+        const data = { [currentParameter]: productToFix[currentParameter] }
+        newItem.push(data)
+    })
+    const productFixed = {}
+    for (var i = 0; i < newItem.length; i++) {
+        for (var propriedade in newItem[i]) {
+            productFixed[propriedade] = newItem[i][propriedade]
+        }
+    }
+    return productFixed
+}
+
+function addUpdatedProductToJSON(productFixed) {
+    productsChecked.push(productFixed)
+    console.log(productFixed)
+}
+
+function downloadAsExcel(data) {
+    if (data) {
+        var worksheet = XLSX.utils.json_to_sheet(data)
+        const workbook = {
+            Sheets: {
+                'data': worksheet
+            },
+            SheetNames: ['data']
+        }
+
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
+        saveAsExcel(excelBuffer, 'myFile')
+    }
 }
 
 function saveAsExcel(buffer, filename) {
