@@ -3,18 +3,20 @@
 const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
 const EXCEL_EXTENSION = '.xlsx'
 
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, Menu, remote } = require('electron')
 const XLSX = require('xlsx')
 
+let mainWindow
 let productsChecked = []
 var parameters
+var count = 0
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 // Create main window
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
 function createWindow() {
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 634,
         height: 394,
         resizable: false,
@@ -22,13 +24,15 @@ function createWindow() {
         frame: true,
         show: false,
         webPreferences: {
+            contextIsolation: true,
             devTools: true,
             nodeIntegrationInWorker: true,
             nodeIntegration: true
         }
     })
+    Menu.setApplicationMenu(false)
+    mainWindow.setMenu(null)
     mainWindow.loadFile('./src/index.html')
-
     mainWindow.once("ready-to-show", () => {
         mainWindow.show()
     })
@@ -45,6 +49,10 @@ app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
         createWindow()
     }
+})
+
+app.on('browser-window-created', function (e, window) {
+    window.setMenu(null)
 })
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
@@ -159,7 +167,8 @@ function loadDataFromExcel() {
 
 function compareDataExtractedFromExcel(productsFromDatabase, productsToFixData) {
     productsToFixData.forEach(function (productsFound, index) {
-        getProgressPercentage(index, productsToFixData - 1)
+        let value = (index / productsToFixData.length) * 100
+        updateProgressStatus(value)
         const productsByBarCode = productsFromDatabase.filter(item => {
             return item.REFERENCIA === productsFound.REFERENCIA
         })
@@ -178,7 +187,9 @@ function compareDataExtractedFromExcel(productsFromDatabase, productsToFixData) 
 function fixProduct(productToFix) {
     const newItem = []
     parameters.forEach(function (currentParameter, index) {
-        const data = { [currentParameter]: productToFix[currentParameter] }
+        const data = {
+            [currentParameter]: productToFix[currentParameter]
+        }
         newItem.push(data)
     })
     const productFixed = {}
@@ -192,7 +203,6 @@ function fixProduct(productToFix) {
 
 function addUpdatedProductToJSON(productFixed) {
     productsChecked.push(productFixed)
-    console.log(productFixed)
 }
 
 
@@ -224,20 +234,21 @@ function saveAsExcel(buffer, filename) {
 // Update progress status
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
-function getProgressPercentage(value, total) {
-    const percent = (value / total) * 100
-    updateProgressTo(percent.toPrecision(3))
-}
+function updateProgressStatus(value) {
+    var bar = document.getElementById('bar')
+    var barLabel = document.getElementById('barLabel')
+    const newValue = value | 0
 
-function showProgressBar() {
-    const progressBarDiv = document.getElementById('progressBarDiv')
-    progressBarDiv.style.display = "block"
-}
+    count = 5
+    console.log(count)
+    if (newValue == count) {
+        count = count + 5;
+        console.log(newValue, count)
+        bar.style.width = count + '%';
+        barLabel.textContent = count + '%';
+    } else {
 
-function updateProgressTo(progress) {
-    const progressBar = document.getElementById('progressBar')
-    progressBar.style.width = progress + "%"
-    progressBar.innerHTML = progress + "%"
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
@@ -245,7 +256,6 @@ function updateProgressTo(progress) {
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
 function getItems() {
-    showProgressBar()
     return new Promise((resolve, rejected) => {
         const selectedFile = document.getElementById('file').files[0]
         if (selectedFile) {
@@ -296,13 +306,11 @@ function getItemsToAnalyze() {
 }
 
 function updateInputProductsDataSpan(element) {
-    console.log("Primeiro input " + element)
     const inputProductsDataSpan = document.getElementById('inputProductsDataSpan')
     inputProductsDataSpan.textContent = element.value.split('\\').pop()
 }
 
 function updateInputProductsToFixDataSpan(element) {
-    console.log("Segundo input " + element)
     const inputProductsToFixDataSpan = document.getElementById('inputProductsToFixDataSpan')
     inputProductsToFixDataSpan.textContent = element.value.split('\\').pop()
 }

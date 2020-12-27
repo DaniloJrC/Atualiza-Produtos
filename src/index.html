@@ -55,22 +55,22 @@
             <!--==============================================================================================================================================-->
             <button onclick="loadDataFromExcel()" id="processButton" class="process-button"
                 onmousedown="return false">Processar</button>
-            <div id="progressBarDiv" style="display: none" class="progress-bar-div">
-                <div class="container">
-                    <div id="progressBar" class="progress-bar progress">5%</div>
+            <!--==============================================================================================================================================-->
+            <div class="progress-bar-div">
+                <label id="barLabel" class="bar-label" for="bar">0%</label>
+                <div class="bar-container">
+                    <div class="bar" id="bar"></div>
                 </div>
             </div>
             <!--==============================================================================================================================================-->
-        </div>
-        <div id="settingsModal" class="modal">
-            <!--==============================================================================================================================================-->
-            <div id="modalDiv" class="modal-content">
-                <h3 class="modal-title">Colunas que serão atualizadas</h3>
-                <span id="closeModalButton" onclick="closeModal()" class="close">&times;</span>
-                <div id="checkBoxDiv" class="check-box-div">
+            <div id="settingsModal" class="modal">
+                <div id="modalDiv" class="modal-content">
+                    <h3 class="modal-title">Colunas que serão atualizadas</h3>
+                    <span id="closeModalButton" onclick="closeModal()" class="closeModalButton">&times;</span>
+                    <div id="checkBoxDiv" class="check-box-div">
+                    </div>
                 </div>
             </div>
             <!--==============================================================================================================================================-->
-        </div>
     </body>
 </html>
