@@ -150,6 +150,7 @@ function getProductsToFixFromExcel() {
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
 function updateInputProductsDataSpan(element) {
+    hideProgressBarDiv()
     const inputProductsDataSpan = document.getElementById('inputProductsDataSpan')
     inputProductsDataSpan.textContent = element.value.split('\\').pop()
     if (element.value === "") {
@@ -159,6 +160,7 @@ function updateInputProductsDataSpan(element) {
 }
 
 function updateInputProductsToFixDataSpan(element) {
+    hideProgressBarDiv()
     const inputProductsToFixDataSpan = document.getElementById('inputProductsToFixDataSpan')
     inputProductsToFixDataSpan.textContent = element.value.split('\\').pop()
     if (element.value === "") {
