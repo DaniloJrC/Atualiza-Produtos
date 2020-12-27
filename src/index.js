@@ -28,8 +28,10 @@ function createWindow() {
             nodeIntegration: true
         }
     })
+
     Menu.setApplicationMenu(false)
     mainWindow.setMenu(null)
+
     mainWindow.loadFile('./src/index.html')
     mainWindow.once("ready-to-show", () => {
         mainWindow.show()
@@ -49,9 +51,9 @@ app.on('activate', () => {
     }
 })
 
-/*app.on('browser-window-created', function (e, window) {
+app.on('browser-window-created', function (e, window) {
     window.setMenu(null)
-})*/
+})
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 // Load data from excel tables and compare 
@@ -80,10 +82,7 @@ function compareDataExtractedFromExcel(productsFromDatabase, productsToFixData) 
             const fixedProduct = fixProduct(productToFix)
             addUpdatedProductToJSON(fixedProduct)
             if (productsChecked.length === productsToFixData.length) {
-                console.log('teste: ' + productsChecked.length, productsToFixData.length)
                 downloadAsExcel(productsChecked)
-            } else {
-                console.log('Sei la')
             }
         }, 1)
     })
@@ -110,6 +109,7 @@ function getProductsFromExcel() {
                 })
             }
         } else {
+            hideProgressBarDiv()
             alert('Não foi possível carregar os dados da planilha mãe!')
             rejected({
                 name: 'Erro',
@@ -138,6 +138,7 @@ function getProductsToFixFromExcel() {
                 })
             }
         } else {
+            hideProgressBarDiv()
             alert('Não foi possível carregar os dados da planilha a ser analisada!')
             rejected({
                 name: 'Erro',
@@ -206,9 +207,10 @@ function downloadAsExcel(data) {
             },
             SheetNames: ['data']
         }
-
+        const today = new Date()
+        const fileName = 'Planilha atualizada: ' + today.toLocaleDateString("pt-Br")
         const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
-        saveAsExcel(excelBuffer, 'myFile')
+        saveAsExcel(excelBuffer, fileName)
     }
 }
 
@@ -227,11 +229,15 @@ function showProgressBarDiv() {
     updateProgressStatus(0)
 }
 
+function hideProgressBarDiv() {
+    const progressBarDiv = document.getElementById('progressBarDiv')
+    progressBarDiv.style.display = "none"
+}
+
 function updateProgressStatus(value) {
     var bar = document.getElementById('bar')
     var barLabel = document.getElementById('barLabel')
     const newValue = Number(value).toPrecision(3) | 0
-    console.log(value, newValue + '%')
     bar.style.width = newValue + '%'
     barLabel.textContent = newValue + '%'
 }
@@ -341,9 +347,8 @@ function createLoaderDiv() {
 }
 
 function removeLoaderDiv() {
-    const checkBoxDiv = document.getElementById('checkBoxDiv')
     const loaderDiv = document.getElementById('loader')
-    checkBoxDiv.removeChild(loaderDiv)
+    loaderDiv.style.display = "none"
 }
 
 function showParameters() {
