@@ -23,9 +23,6 @@ function createWindow() {
         frame: true,
         show: false,
         webPreferences: {
-            contextIsolation: true,
-            devTools: true,
-            nodeIntegrationInWorker: false,
             nodeIntegration: true
         }
     })
