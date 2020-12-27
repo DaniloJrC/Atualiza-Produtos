@@ -1,4 +1,4 @@
-"use strict";
+"use strict"
 
 const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
 const EXCEL_EXTENSION = '.xlsx'
@@ -53,14 +53,14 @@ app.on('activate', () => {
     window.setMenu(null)
 })*/
 
-
 //------------------------------------------------------------------------------------------------------------------------------------------------
 // Load data from excel tables and compare 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
 function loadDataFromExcel() {
+    productsChecked = []
+    showProgressBarDiv()
     Promise.all([getProductsFromExcel(), getProductsToFixFromExcel()]).then((values) => {
-        shotProgressBarDiv()
         const productsFromDatabase = values[0]
         const productsToFixData = values[1]
         compareDataExtractedFromExcel(productsFromDatabase, productsToFixData)
@@ -69,17 +69,24 @@ function loadDataFromExcel() {
 
 function compareDataExtractedFromExcel(productsFromDatabase, productsToFixData) {
     productsToFixData.forEach(function (productsFound, index) {
-        let value = (index / productsToFixData.length) * 100
-        updateProgressStatus(value)
-        const productsByBarCode = productsFromDatabase.filter(item => {
-            return item.REFERENCIA === productsFound.REFERENCIA
-        })
-        const productToFix = productsByBarCode[0]
-        const fixedProduct = fixProduct(productToFix)
-        addUpdatedProductToJSON(fixedProduct)
+        setTimeout(function () {
+            let value = ((index + 1) * 100) / productsToFixData.length
+            updateProgressStatus(value)
 
+            const productsByBarCode = productsFromDatabase.filter(item => {
+                return item.REFERENCIA === productsFound.REFERENCIA
+            })
+            const productToFix = productsByBarCode[0]
+            const fixedProduct = fixProduct(productToFix)
+            addUpdatedProductToJSON(fixedProduct)
+            if (productsChecked.length === productsToFixData.length) {
+                console.log('teste: ' + productsChecked.length, productsToFixData.length)
+                downloadAsExcel(productsChecked)
+            } else {
+                console.log('Sei la')
+            }
+        }, 1)
     })
-    downloadAsExcel(productsChecked)
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
@@ -144,16 +151,21 @@ function getProductsToFixFromExcel() {
 // Update input file name on html
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
-
 function updateInputProductsDataSpan(element) {
     const inputProductsDataSpan = document.getElementById('inputProductsDataSpan')
     inputProductsDataSpan.textContent = element.value.split('\\').pop()
+    if (element.value === "") {
+        inputProductsDataSpan.textContent = "Insira a planilha mãe aqui..."
+    }
     parameters = []
 }
 
 function updateInputProductsToFixDataSpan(element) {
     const inputProductsToFixDataSpan = document.getElementById('inputProductsToFixDataSpan')
     inputProductsToFixDataSpan.textContent = element.value.split('\\').pop()
+    if (element.value === "") {
+        inputProductsToFixDataSpan.textContent = "Insira a planilha a ser analisada aqui..."
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
@@ -209,18 +221,19 @@ function saveAsExcel(buffer, filename) {
 // Update progress status
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
-function shotProgressBarDiv() {
+function showProgressBarDiv() {
     const progressBarDiv = document.getElementById('progressBarDiv')
-    progressBarDiv.style.display = "block"
+    progressBarDiv.style.display = "grid"
+    updateProgressStatus(0)
 }
 
 function updateProgressStatus(value) {
     var bar = document.getElementById('bar')
     var barLabel = document.getElementById('barLabel')
-    const newValue = value | 0
+    const newValue = Number(value).toPrecision(3) | 0
+    console.log(value, newValue + '%')
     bar.style.width = newValue + '%'
     barLabel.textContent = newValue + '%'
-    console.log(newValue)
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
