@@ -3,7 +3,7 @@
 const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
 const EXCEL_EXTENSION = '.xlsx'
 
-const { app, BrowserWindow, Menu, remote } = require('electron')
+const { app, BrowserWindow } = require('electron')
 const XLSX = require('xlsx')
 
 let mainWindow
@@ -23,13 +23,13 @@ function createWindow() {
         frame: true,
         show: false,
         webPreferences: {
+            contextIsolation: true,
             devTools: true,
             nodeIntegrationInWorker: false,
             nodeIntegration: true
         }
     })
 
-    Menu.setApplicationMenu(false)
     mainWindow.setMenu(null)
 
     mainWindow.loadFile('./src/index.html')
