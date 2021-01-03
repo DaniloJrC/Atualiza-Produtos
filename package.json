@@ -1,12 +1,12 @@
 {
   "name": "Atualiza_Produtos",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Projeto criado para atualizar dados tributários dos produtos. Cliente: Trindade Contabilidade",
   "main": "./src/index.js",
   "copyright": "Copyright © 2021 ${author}",
   "scripts": {
     "start": "electron .",
-    "build": "electron-packager /Users/danilo/Developer/JS/Atualiza-Produtos Atualiza-produtos --platform=win32 --arch=x64 --electron-version=11.1.1"
+    "build": "electron-packager /Users/danilo/Developer/JS/Atualiza-Produtos Atualiza-Produtos --platform=win32 --arch=x64 --electron-version=11.1.1"
   },
   "repository": {
     "type": "git",
