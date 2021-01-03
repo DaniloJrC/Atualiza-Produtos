@@ -7,8 +7,8 @@ const { app, BrowserWindow } = require('electron')
 const XLSX = require('xlsx')
 
 let mainWindow
-let productsChecked = []
-var parameters = []
+let newProducts = []
+let localParameters = {}
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 // Create main window
@@ -16,6 +16,7 @@ var parameters = []
 
 function createWindow() {
     mainWindow = new BrowserWindow({
+        icon: '../icon/icon.ico',
         width: 634,
         height: 394,
         resizable: false,
@@ -57,7 +58,7 @@ app.on('browser-window-created', function (e, window) {
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
 function loadDataFromExcel() {
-    productsChecked = []
+    newProducts = []
     showProgressBarDiv()
     Promise.all([getProductsFromExcel(), getProductsToFixFromExcel()]).then((values) => {
         const productsFromDatabase = values[0]
@@ -67,22 +68,58 @@ function loadDataFromExcel() {
 }
 
 function compareDataExtractedFromExcel(productsFromDatabase, productsToFixData) {
-    productsToFixData.forEach(function (productsFound, index) {
-        setTimeout(function () {
-            let value = ((index + 1) * 100) / productsToFixData.length
-            updateProgressStatus(value)
+    if (checkFieldsNames(productsFromDatabase[0], "mãe.") && checkFieldsNames(productsToFixData[0], "filha.")) {
+        productsToFixData.forEach(function (productToFix, index) {
+            setTimeout(function () {
+                let value = ((index + 1) * 100) / productsToFixData.length
+                updateProgressStatus(value)
 
-            const productsByBarCode = productsFromDatabase.filter(item => {
-                return item.REFERENCIA === productsFound.REFERENCIA
-            })
-            const productToFix = productsByBarCode[0]
-            const fixedProduct = fixProduct(productToFix)
-            addUpdatedProductToJSON(fixedProduct)
-            if (productsChecked.length === productsToFixData.length) {
-                downloadAsExcel(productsChecked)
-            }
-        }, 1)
-    })
+                if (productToFix.CODIGO_DE_BARRAS) {
+                    console.log('Produto tem codigo de barras: ' + productToFix.CODIGO_DE_BARRAS)
+                    const productFoundByBarCode = productsFromDatabase.find(productFromDatabase => formatBarCode(productFromDatabase.CODIGO_DE_BARRAS) === formatBarCode(productToFix.CODIGO_DE_BARRAS))
+
+                    if (productFoundByBarCode) {
+                        console.log('Produto encontrado: ' + productFoundByBarCode.DESCRICAO + ' - ' + productFoundByBarCode.CODIGO_DE_BARRAS)
+                        productFoundByBarCode.CODIGO_DE_BARRAS = formatBarCode(productFoundByBarCode.CODIGO_DE_BARRAS)
+                        const newProduct = cloneDataFrom(productFoundByBarCode, productToFix)
+                        newProducts.push(newProduct)
+                    } else {
+                        console.log('Produto não encontrado! ' + productToFix.DESCRICAO + ' - ' + productToFix.CODIGO_DE_BARRAS)
+                        const productNotFounded = formatProductNotFounded(productToFix)
+                        newProducts.push(productNotFounded)
+                    }
+                } else {
+                    console.log('Produto não tem codigo de barras: ' + productToFix.DESCRICAO + ' - ' + productToFix.CODIGO_DE_BARRAS)
+                    const productNotFounded = formatProductNotFounded(productToFix)
+                    newProducts.push(productNotFounded)
+                }
+                if (newProducts.length === productsToFixData.length) {
+                    downloadAsExcel(newProducts)
+                }
+            }, 1)
+        })
+    }
+}
+
+function checkFieldsNames(product, tableName) {
+    if (!product.CODIGO) {
+        alert('Altere o nome da coluna com os códigos dos produtos para "CODIGO" na tabela ' + tableName)
+        return false
+    } else if (!product.CODIGO_DE_BARRAS) {
+        alert('Altere o nome da coluna com os códigos de barras para "CODIGO_DE_BARRAS" na tabela ' + tableName)
+        return false
+    } else if (!product.DESCRICAO) {
+        alert('Altere o nome da coluna com as descrições dos produtos para "DESCRICAO" na tabela ' + tableName)
+        return false
+    } else {
+        return true
+    }
+}
+
+function formatBarCode(barCodeNumber) {
+    let onlyNumbersFromString = String(barCodeNumber).replace(/[^0-9]/g, '')
+    let formattedBarCode = Number(onlyNumbersFromString)
+    return String(formattedBarCode)
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
@@ -100,8 +137,11 @@ function getProductsFromExcel() {
                 let workbook = XLSX.read(data, { type: "binary" })
                 workbook.SheetNames.forEach(function (sheet, i) {
                     let rowObject = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheet])
-                    const headerItems = Object.keys(rowObject[0])
-                    parameters = headerItems
+                    if (rowObject.length === 0) {
+                        alert('A planilha mãe está vazia!')
+                    } else {
+                        createParametersObject(Object.keys(rowObject[0]))
+                    }
                     resolve(rowObject)
                 })
             }
@@ -131,6 +171,9 @@ function getProductsToFixFromExcel() {
                 let workbook = XLSX.read(data, { type: "binary" })
                 workbook.SheetNames.forEach(function (sheet, i) {
                     let rowObject = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheet])
+                    if (rowObject.length === 0) {
+                        alert('A planilha filha está vazia!')
+                    }
                     resolve(rowObject)
                 })
             }
@@ -156,7 +199,7 @@ function updateInputProductsDataSpan(element) {
     if (element.value === "") {
         inputProductsDataSpan.textContent = "Insira a planilha mãe aqui..."
     }
-    parameters = []
+    localParameters = {}
 }
 
 function updateInputProductsToFixDataSpan(element) {
@@ -172,25 +215,50 @@ function updateInputProductsToFixDataSpan(element) {
 // Fix product data 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
-function fixProduct(productToFix) {
-    const newItem = []
-    parameters.forEach(function (currentParameter, index) {
-        const data = {
-            [currentParameter]: productToFix[currentParameter]
+function cloneDataFrom(productFromDatabase, productToFix) {
+    const newProduct = {}
+    const parametersNames = Object.keys(localParameters)
+    parametersNames.forEach(function (parameter, index) {
+        if (parameter === "CODIGO") {
+            newProduct["CODIGO"] = productToFix.CODIGO
+        } else if (parameter === "DESCRICAO") {
+            newProduct["DESCRICAO"] = productToFix.DESCRICAO
+        } else if (parameter === "CODIGO_DE_BARRAS") {
+            newProduct["CODIGO_DE_BARRAS"] = productToFix.CODIGO_DE_BARRAS
+        } else {
+            const parameterValue = localParameters[parameter]
+            if (parameterValue === true) {
+                newProduct[parameter] = productFromDatabase[String(parameter).toUpperCase()]
+            }
         }
-        newItem.push(data)
+        if (parametersNames.length - 1 === index) {
+            newProduct["STATUS"] = "PRODUTO VERIFICADO"
+        }
     })
-    const productFixed = {}
-    for (var i = 0; i < newItem.length; i++) {
-        for (var propriedade in newItem[i]) {
-            productFixed[propriedade] = newItem[i][propriedade]
-        }
-    }
-    return productFixed
+    return newProduct
 }
 
-function addUpdatedProductToJSON(productFixed) {
-    productsChecked.push(productFixed)
+function formatProductNotFounded(product) {
+    const newProduct = {}
+    const parametersNames = Object.keys(localParameters)
+    parametersNames.forEach(function (parameter, index) {
+        if (parameter === "CODIGO") {
+            newProduct["CODIGO"] = product.CODIGO
+        } else if (parameter === "DESCRICAO") {
+            newProduct["DESCRICAO"] = product.DESCRICAO
+        } else if (parameter === "CODIGO_DE_BARRAS") {
+            newProduct["CODIGO_DE_BARRAS"] = product.CODIGO_DE_BARRAS
+        } else {
+            const parameterValue = localParameters[parameter]
+            if (parameterValue === true) {
+                newProduct[parameter] = ""
+            }
+        }
+        if (parametersNames.length - 1 === index) {
+            newProduct["STATUS"] = "PRODUTO NÃO VERIFICADO"
+        }
+    })
+    return newProduct
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
@@ -275,7 +343,7 @@ function fetchParameters() {
     const checkBoxMainDiv = document.getElementById('checkBoxDiv')
     checkBoxMainDiv.innerHTML = ''
     createLoaderDiv()
-    if (parameters !== undefined && parameters.length > 0) {
+    if (Object.keys(localParameters).length > 0) {
         loadLocalParameters()
     } else {
         loadParametersFromExcel()
@@ -283,9 +351,9 @@ function fetchParameters() {
 }
 
 function loadLocalParameters() {
-    parameters.forEach(function (parameter, index) {
-        createParameterCheckbox(parameter)
-        if (index == parameters.length - 1) {
+    Object.keys(localParameters).forEach(function (parameterName, index) {
+        createParameterCheckbox(parameterName, localParameters[parameterName])
+        if (index === Object.keys(localParameters).length - 1) {
             showParameters()
         }
     })
@@ -294,22 +362,29 @@ function loadLocalParameters() {
 function loadParametersFromExcel() {
     getProductsFromExcel().then(function (products) {
         removeLoaderDiv()
-        const headerItems = Object.keys(products[0])
-        parameters = headerItems
-        headerItems.forEach(function (parameter, index) {
-            createParameterCheckbox(parameter)
-            if (index == headerItems.length - 1) {
+        createParametersObject(Object.keys(products[0]))
+        Object.keys(localParameters).forEach(function (parameter, index) {
+            createParameterCheckbox(parameter, true)
+            if (index === Object.keys(localParameters).length - 1) {
                 showParameters()
             }
         })
     })
 }
 
+function createParametersObject(headerItems) {
+    if (Object.keys(localParameters).length === 0) {
+        headerItems.forEach(function (parameter) {
+            localParameters[String(parameter).toUpperCase()] = true
+        })
+    }
+}
+
 //------------------------------------------------------------------------------------------------------------------------------------------------
 // Create parameters checkbox in html
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
-function createParameterCheckbox(parameter) {
+function createParameterCheckbox(parameter, state) {
     const checkBoxMainDiv = document.getElementById('checkBoxDiv')
     const checkBoxDiv = document.createElement('div')
     checkBoxDiv.setAttribute('id', 'divBox')
@@ -319,7 +394,10 @@ function createParameterCheckbox(parameter) {
     checkBox.setAttribute('type', 'checkbox')
     checkBox.setAttribute('id', parameter)
     checkBox.setAttribute('class', 'checkBox')
-    checkBox.setAttribute('checked', true)
+    if (state) { checkBox.setAttribute('checked', state) }
+    checkBox.onclick = function () {
+        toggleParameter(this)
+    }
 
     const labelCheckBox = document.createElement('label')
     labelCheckBox.setAttribute('for', parameter)
@@ -327,10 +405,20 @@ function createParameterCheckbox(parameter) {
     labelCheckBox.setAttribute('class', 'labelCheckBox')
 
     labelCheckBox.innerHTML = parameter
-    checkBox.value = true
     checkBoxMainDiv.appendChild(checkBoxDiv)
     checkBoxDiv.appendChild(checkBox)
     checkBoxDiv.appendChild(labelCheckBox)
+    if (parameter === "CODIGO") { checkBox.disabled = true }
+    if (parameter === "DESCRICAO") { checkBox.disabled = true }
+    if (parameter === "CODIGO_DE_BARRAS") { checkBox.disabled = true }
+}
+
+function toggleParameter(parameter) {
+    const parameterValue = parameter.checked
+    const parameterName = parameter.getAttribute('id')
+    localParameters[parameterName] = parameterValue
+    const checkBox = document.getElementById(parameterName)
+    checkBox.checked = parameterValue
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------

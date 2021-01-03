@@ -227,7 +227,7 @@ body {
     border-style: solid;
     border-color: #50e3c2;
     width: 80%;
-    height: 65%;
+    height: 80%;
     display: grid;
     grid-template-columns: 95% 5%;
     grid-template-rows: 32px auto;
@@ -269,7 +269,7 @@ body {
 .check-box-div {
     overflow: auto;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     grid-template-rows: 24px;
     grid-gap: 0px;
     grid-column-start: 1;
