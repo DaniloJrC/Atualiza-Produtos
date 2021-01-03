@@ -16,7 +16,7 @@ let localParameters = {}
 
 function createWindow() {
     mainWindow = new BrowserWindow({
-        icon: '../icon/icon.ico',
+        icon: __dirname + '/icon.ico',
         width: 634,
         height: 394,
         resizable: false,
@@ -212,7 +212,7 @@ function updateInputProductsToFixDataSpan(element) {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
-// Fix product data 
+// Clone data 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
 function cloneDataFrom(productFromDatabase, productToFix) {

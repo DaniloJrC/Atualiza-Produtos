@@ -3,8 +3,12 @@
   "version": "1.0.1",
   "description": "Projeto criado para atualizar dados tributários dos produtos. Cliente: Trindade Contabilidade",
   "main": "./src/index.js",
+  "copyright": "Copyright © 2021 ${author}",
   "scripts": {
     "start": "electron ."
+  },
+  "win": {
+    "icon": "./icon/256x256.png"
   },
   "repository": {
     "type": "git",
