@@ -1,7 +1,7 @@
 {
   "name": "Atualiza_Produtos",
-  "version": "1.0.2",
-  "description": "Projeto criado para atualizar dados tributários dos produtos. Cliente: Trindade Contabilidade",
+  "version": "1.0.3",
+  "description": "Projeto criado para atualizar dados tributários dos produtos.",
   "main": "./src/index.js",
   "copyright": "Copyright © 2021 Danilo Junio Constâncio",
   "scripts": {

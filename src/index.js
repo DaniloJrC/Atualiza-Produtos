@@ -9,6 +9,7 @@ const XLSX = require('xlsx')
 let mainWindow
 let newProducts = []
 let localParameters = {}
+let developerTools = false
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 // Create main window
@@ -16,7 +17,6 @@ let localParameters = {}
 
 function createWindow() {
     mainWindow = new BrowserWindow({
-        icon: __dirname + '/icon.ico',
         width: 634,
         height: 394,
         resizable: false,
@@ -28,7 +28,9 @@ function createWindow() {
         }
     })
 
-    mainWindow.setMenu(null)
+    if (!developerTools) {
+        mainWindow.setMenu(null)
+    }
 
     mainWindow.loadFile('./src/index.html')
     mainWindow.once("ready-to-show", () => {
@@ -50,7 +52,9 @@ app.on('activate', () => {
 })
 
 app.on('browser-window-created', function (e, window) {
-    window.setMenu(null)
+    if (!developerTools) {
+        window.setMenu(null)
+    }
 })
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
@@ -73,23 +77,17 @@ function compareDataExtractedFromExcel(productsFromDatabase, productsToFixData) 
             setTimeout(function () {
                 let value = ((index + 1) * 100) / productsToFixData.length
                 updateProgressStatus(value)
-
                 if (productToFix.CODIGO_DE_BARRAS) {
-                    console.log('Produto tem codigo de barras: ' + productToFix.CODIGO_DE_BARRAS)
                     const productFoundByBarCode = productsFromDatabase.find(productFromDatabase => formatBarCode(productFromDatabase.CODIGO_DE_BARRAS) === formatBarCode(productToFix.CODIGO_DE_BARRAS))
-
                     if (productFoundByBarCode) {
-                        console.log('Produto encontrado: ' + productFoundByBarCode.DESCRICAO + ' - ' + productFoundByBarCode.CODIGO_DE_BARRAS)
                         productFoundByBarCode.CODIGO_DE_BARRAS = formatBarCode(productFoundByBarCode.CODIGO_DE_BARRAS)
                         const newProduct = cloneDataFrom(productFoundByBarCode, productToFix)
                         newProducts.push(newProduct)
                     } else {
-                        console.log('Produto não encontrado! ' + productToFix.DESCRICAO + ' - ' + productToFix.CODIGO_DE_BARRAS)
                         const productNotFounded = formatProductNotFounded(productToFix)
                         newProducts.push(productNotFounded)
                     }
                 } else {
-                    console.log('Produto não tem codigo de barras: ' + productToFix.DESCRICAO + ' - ' + productToFix.CODIGO_DE_BARRAS)
                     const productNotFounded = formatProductNotFounded(productToFix)
                     newProducts.push(productNotFounded)
                 }
@@ -102,7 +100,7 @@ function compareDataExtractedFromExcel(productsFromDatabase, productsToFixData) 
 }
 
 function checkFieldsNames(product, tableName) {
-    if (!product.CODIGO) {
+    if (!product.CODIGO && tableName === "filha.") {
         alert('Altere o nome da coluna com os códigos dos produtos para "CODIGO" na tabela ' + tableName)
         return false
     } else if (!product.CODIGO_DE_BARRAS) {
@@ -374,6 +372,11 @@ function loadParametersFromExcel() {
 
 function createParametersObject(headerItems) {
     if (Object.keys(localParameters).length === 0) {
+        localParameters = {
+            "CODIGO": true,
+            "DESCRICAO": true,
+            "CODIGO_DE_BARRAS": true
+        }
         headerItems.forEach(function (parameter) {
             localParameters[String(parameter).toUpperCase()] = true
         })
